@@ -1,7 +1,7 @@
 
 Import one git repository into another, maintaining all commit history.
 
-Usage: git-import [repo] [path]
+Usage: `git-import [repo] [path]`
 
 From within a git repository, specify a URL or path to a repository that contains the files you want to import and the path in the current repository that you want them be stored in. This can be run from anywhere within your repository.
 
