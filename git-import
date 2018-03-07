@@ -1,40 +1,45 @@
 #!/bin/bash
 
-##############################################################################
+########################################################################
 # MIT License
 #
 # Copyright (c) 2017 Michael Kenney
 #
-# Import one git repository into another, maintaining all commit history.
+# Import one git repository into another, maintaining all commit
+# history.
 #
-# Usage: git-import [repo] [path]
+# Usage: git-import REPO PATH
 #
-# From within a git repository, specify a URL or path to a repository that
-# contains the files you want to import and the path in the current repository
-# that you want them be stored in. This can be run from anywhere within your
-# repository.
+# From within a git repository, specify a URL or path to a repository
+# that contains the files you want to import and the path in the current
+# repository that you want them be stored in. This can be run from
+# anywhere within your repository.
 #
-# If the [repo] argument is not a valid git repository, the program will exit.
+# If the REPO argument is not a valid git repository, the program will
+# exit.
 #
-# If the [path] argument is a path outside the current repository, the program
-# will exit.
+# If the PATH argument is a path outside the current repository, the
+# program will exit.
 #
-# If the [path] argument points to a file or directory that exists, you will
-# be prompted to delete the file/directory. This is irreversible.
+# If the PATH argument points to a file or directory that exists, you
+# will be prompted to delete the file/directory. This is irreversible.
 #
-# If the imported repository has any submodule definitions, for each one you
-# will be prompted to either import it's files and commit history, migrate the
-# submodule definition into the the current repository, or ignore it entirely.
-#
-##############################################################################
+# If the imported repository has any submodule definitions, for each one
+# you will be prompted to either import it's files and commit history,
+# migrate the submodule definition into the the current repository, or
+# ignore it entirely.
+########################################################################
 
-#
+# temporary file location for cloned repositories
+SUBPROJECT_CLONE_PATH=/tmp/git-import-$(date +%s%N)
+SUBMODULE_BACKUP_FILE=/tmp/git-import-submodule-backup-$(date +%s%N)
+
 # iterate up directories to find a file
-#
 function rfind() {
     test / == "$PWD" && return || test -e "$1" && echo "$PWD" && return || cd .. && rfind "$1"
 }
 
+# test a url OR a path to see if it's a repository
 function test_url() {
     git ls-remote $1 &> /dev/null
     if [ 0 -eq $? ]; then
@@ -42,6 +47,8 @@ function test_url() {
     fi
 }
 
+# prompt to overwrite any existing target path, otherwise create the
+# path
 function test_path() {
     if [ "" = "$1" ]; then
         error_subproject_path_required
@@ -58,8 +65,8 @@ function test_path() {
 
     if [ -e "$1" ]; then
         printf "
-    A file exists at the following location and will be deleted, do you want
-    to continue?
+    A file exists at the following location and will be deleted, do you
+    want to continue?
 
     THIS CANNOT BE UNDONE!
 
@@ -85,10 +92,12 @@ function full_path() {
     pwd
 }
 
+# prompt for submodule import behavior
 function import_prompt() {
     printf "
-    Do you want to import the following submodule files and commit history,
-    migrate the submodule definitions to this project, or exclude these files?
+    Do you want to import the following submodule files and commit
+    history, migrate the submodule definitions to this project, or
+    exclude these files?
 
     $1
 
@@ -108,31 +117,31 @@ function import_prompt() {
     return 0
 }
 
-#
-# display script usage text
-#
+# display simple usage text
 function usage() {
     printf "
-    Usage: $0 [project url] [file path]
+    Usage: $0 REPO PATH
 
     Import files and history from one git repository into another.
 
-    From inside your target repository, specify the URL of the repository you
-    want to import and the destination path for it's files. The git indexes
-    will be rewritten with imported file history at the path specified.
+    From inside your target repository, specify the URL or path to the
+    repository you want to import and the destination path for it's
+    files. The git indexes will be rewritten with imported file history
+    at the path specified.
 
-    If the imported project contains any git submodules, you will be promted
-    to either import and merge those projects files and history or add the
-    submodules to your target repository.
+    If the imported project contains any git submodules, you will be
+    promted to either import and merge those projects files and history
+    or add the submodules to your target repository.
 
-    I don't use git subtrees, those are ignored. Let me know if I should add
-    that.
+    I don't use git subtrees, those are ignored. Let me know if I should
+    add that.
 "
 }
 
-#
-# display an error if run outside of a git repository
-#
+########################################################################
+# error messages
+########################################################################
+
 function error_not_in_repo() {
     printf "
     ERROR: not in a git repository
@@ -142,38 +151,43 @@ function error_not_in_repo() {
 
 function error_subproject_url_required() {
     printf "
-    ERROR: URL is required
+    ERROR: REPO is required
 "
     exit 2
 }
 
 function error_subproject_url_invalid() {
     printf "
-    ERROR: URL is is not a valid git repository
+    ERROR: REPO is is not a valid git repository
 "
     exit 3
 }
 
 function error_subproject_path_required() {
     printf "
-    ERROR: Path is required
+    ERROR: PATH is required
 "
     exit 4
 }
 
 function error_subproject_path_outside_repo() {
     printf "
-    ERROR: specified path is outside of this repository
+    ERROR: specified PATH is outside of this repository
 "
     exit 5
 }
 
 function error_subproject_url_cannot_equal_path() {
     printf "
-    ERROR: the repository location and target path cannot be the same value
+    ERROR: the repository location and target path cannot be the same
+    value
 "
     exit 6
 }
+
+########################################################################
+# input validation
+########################################################################
 
 echo "Validating repository..."
 PROJECT_PATH=$(rfind .git)
@@ -225,10 +239,9 @@ if [ "" = "$SUBPROJECT_PATH" ]; then
     exit $?
 fi
 
-SUBPROJECT_CLONE_PATH=/tmp/git-import-$(date +%s%N)
-SUBMODULE_BACKUP_FILE=/tmp/git-import-submodule-backup-$(date +%s%N)
-
-##############################################################################
+########################################################################
+# begin import
+########################################################################
 
 declare -a submodules
 
@@ -307,7 +320,6 @@ for submodule in "${submodules[@]}"; do
 done
 git add .gitmodules
 git commit -m "Migrate submodule definitions from $SUBPROJECT_URL"
-
 cd $PROJECT_PATH
 git submodule update --init --recursive
 
