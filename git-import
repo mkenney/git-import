@@ -245,11 +245,11 @@ fi
 
 declare -a submodules
 
-cp -f $PROJECT_PATH/.gitmodules $SUBMODULE_BACKUP_FILE
+cp -f $PROJECT_PATH/.gitmodules $SUBMODULE_BACKUP_FILE &> /dev/null
 
 git clone $SUBPROJECT_URL $SUBPROJECT_CLONE_PATH
 cd $SUBPROJECT_CLONE_PATH
-cp -f .gitmodules .gitmodules.original
+cp -f .gitmodules .gitmodules.original &> /dev/null
 
 # deal with submodules
 for tmp in $(git config --file .gitmodules --get-regexp url | sed 's/ /;/g'); do
@@ -296,7 +296,7 @@ for tmp in $(git config --file .gitmodules --get-regexp url | sed 's/ /;/g'); do
     fi
 done
 cd $SUBPROJECT_CLONE_PATH
-git rm -f .gitmodules
+git rm -f .gitmodules &> /dev/null
 git commit -am "$SUBPROJECT_URL submodules merged"
 
 # fix file paths in the repo
@@ -312,13 +312,13 @@ rm -rf $SUBPROJECT_CLONE_PATH
 
 # migrate submodule definitions
 cd $PROJECT_PATH
-cp -f $SUBMODULE_BACKUP_FILE .gitmodules
-git add .gitmodules
+cp -f $SUBMODULE_BACKUP_FILE .gitmodules  &> /dev/null
+git add .gitmodules  &> /dev/null
 for submodule in "${submodules[@]}"; do
     IFS=';' read -r -a parts <<< "$submodule"
     git submodule add -f ${parts[0]} ${parts[1]}
 done
-git add .gitmodules
+git add .gitmodules  &> /dev/null
 git commit -m "Migrate submodule definitions from $SUBPROJECT_URL"
 cd $PROJECT_PATH
 git submodule update --init --recursive
