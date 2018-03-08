@@ -34,8 +34,8 @@ $ cd my-repo
 $ git init
 Initialized empty Git repository in ~/my-repo/.git/
 
-$ ls -a
-./  ../  .git/
+$ git log
+fatal: your current branch 'master' does not have any commits yet
 
 $ git-import git@github.com:mkenney/git-import.git ./libs/git-import
 Validating repository...
@@ -64,14 +64,17 @@ On branch master
 nothing to commit, working tree clean
 
 $ git log
-commit 2afac3ddf0b3c2328fc2aa5a277b199a69a75f30 (HEAD -> master)
-Merge: 388676f ef682fb
+commit ddd6af37abff828c2c84089bc289646ebe5a48c3 (HEAD -> master)
 Author: Michael Kenney <mkenney@webbedlam.com>
-Date:   Wed Mar 7 01:01:37 2018 -0700
+Date:   Wed Mar 7 19:46:35 2018 -0700
 
-    Merge pull request #1 from mkenney/cleanup
+    cleanup error output
 
-    cleanup
+commit 6bc503bebf5fdc543742062b37b8b72603b85daf
+Author: Michael Kenney <mkenney@webbedlam.com>
+Date:   Wed Mar 7 19:46:18 2018 -0700
+
+    add examples
 
 commit ef682fb1df08000e91d617d6f7b1e767db2c6a41
 Author: Michael Kenney <mkenney@webbedlam.com>
@@ -84,12 +87,6 @@ Author: Michael Kenney <michael.kenney@returnpath.com>
 Date:   Thu Sep 7 19:03:34 2017 -0600
 
     formatting
-
-commit 6c10c15f3fb773bc328bb5e5b31ad6653a8dee3f
-Author: Michael Kenney <michael.kenney@returnpath.com>
-Date:   Thu Sep 7 19:02:50 2017 -0600
-
-    file mode
 ...
 
 $
