@@ -51,8 +51,7 @@ function test_url() {
 # path
 function test_path() {
     if [ "" = "$1" ]; then
-        error_subproject_path_required
-        exit 2
+        return
     fi
 
     parent_path=$(rfind .git)
@@ -163,11 +162,9 @@ function error_subproject_url_invalid() {
     exit 3
 }
 
-function error_subproject_path_required() {
-    printf "
-    ERROR: PATH is required
+function warn_subproject_path_assumed() {
+    printf "WARN: path automatically set to './$1'
 "
-    exit 4
 }
 
 function error_subproject_path_outside_repo() {
@@ -216,7 +213,7 @@ if [ 0 -eq $exit_code ]; then
     len=$((${#PROJECT_PATH}+1))
     SUBPROJECT_PATH="${SUBPROJECT_PATH:$len}"
 else
-    exit $exit_code
+    exit_code=0
 fi
 
 if [ "-h" = "$SUBPROJECT_URL" ] || [ "--help" = "$SUBPROJECT_URL" ]; then
@@ -235,8 +232,14 @@ if [ "" = "$SUBPROJECT_URL" ]; then
 fi
 
 if [ "" = "$SUBPROJECT_PATH" ]; then
-    error_subproject_path_required
-    exit $?
+    # default the path to the name of the imported project
+    url=$SUBPROJECT_URL
+    if [ -d "$SUBPROJECT_URL" ]; then
+        url=$(cd $SUBPROJECT_URL && git config --get remote.origin.url)
+    fi
+    SUBPROJECT_PATH=${url##*/}
+    SUBPROJECT_PATH=${SUBPROJECT_PATH%%.git}
+    warn_subproject_path_assumed $SUBPROJECT_PATH
 fi
 
 ########################################################################
@@ -306,7 +309,7 @@ git filter-branch --index-filter 'git ls-files -s | awk '\''{printf "%s %s %s\t'
 # merge sub-project files into this repo
 cd $PROJECT_PATH
 git remote add -f $(basename $SUBPROJECT_CLONE_PATH) $SUBPROJECT_CLONE_PATH
-git merge --allow-unrelated-histories $(basename $SUBPROJECT_CLONE_PATH)/master -m 'Merge remote-tracking branch '\''$(basename $SUBPROJECT_CLONE_PATH)/master'\'''
+git merge --allow-unrelated-histories $(basename $SUBPROJECT_CLONE_PATH)/master -m "Merge remote-tracking branch '$(basename $SUBPROJECT_CLONE_PATH)/master'"
 git remote rm $(basename $SUBPROJECT_CLONE_PATH)
 rm -rf $SUBPROJECT_CLONE_PATH
 

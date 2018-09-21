@@ -15,6 +15,8 @@ git-import REPO PATH
 
 If the `REPO` argument is not a valid `git` repository, the program will exit.
 
+If the `PATH` argument is omitted it will default to the name of the imported repository.
+
 If the `PATH` argument is a path outside of the current repository, the program will exit.
 
 If the `PATH` argument points to a file or directory that exists, you will be prompted to delete the file/directory. This is irreversible.
