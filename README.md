@@ -1,3 +1,8 @@
+# Idiomatic solution
+
+I'm kind of surprised I didn't come across the [subtree solutions](https://stackoverflow.com/a/32684503/867812) when I was writing this script. I did need to deal with the submodules in a couple of specific ways so I probably searched for the wrong words. I like the way this script turned out though, I'll probably keep using it.
+
+
 # git-import
 
 Import one git repository into another, maintaining all commit history.
